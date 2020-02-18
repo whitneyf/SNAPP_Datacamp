@@ -11,4 +11,4 @@ for (package in packages) { if (!(package %in% installed.packages())) { install.
 # "X gets the value of" ... 3*3
 x <- 3*3
 
-# 
+# Testing git commit
