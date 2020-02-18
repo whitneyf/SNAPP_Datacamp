@@ -1,0 +1,77 @@
+---
+author: Whitney Friedman
+date: 2/18/2020
+title: "SNAPP Postdoc Training"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Getting started with R Markdown
+
+Some useful R markdown commands: 
+**Bold text** 
+
+Lists
+
+* apple
+* banana
+* kiwi
+
+Need to include a blank line in code before a new paragraph. 
+
+Help > Markdown Quick Reference
+
+* Basic commands
+* Can use simple LaTeX code (for equations)
+* $\sum{x^2}$
+
+Help > Cheatsheets
+
+* Downloadable cheatsheets here
+* See: Rmarkdown reference guide
+
+# Open a new R chunk
+* CMD-Option-i to open new code chunk (default: R)
+* RMD also supports python and bash command
+* Note, when you knit, it opens code in a new environment. Variables run there are not saved locally.
+* But if you hit the "play" button, it runs the code locally (and saves variables here)
+* Gear icon > chunk output inline  / chunk output in console.
+* Gear > clear all output
+* Naming chunks is a style thing. Each one needs a distinct name within a document. 
+
+```{r new-chunk}
+# Type normal r-code here; print x
+x <- c(1,13,-5)
+x
+```
+
+
+```{r}
+y <- x + 4
+print(y)
+```
+
+# Chunk options
+* If you set echo = False, the chunk is RUN but its hidden from the knit document. Outputs are shown.
+* If you set eval = False, the chunk will not be run
+* message / warning = False, don't show warnings... 
+* See more at help > cheatsheets > R markdown reference guide
+
+```{r, echo=FALSE}
+y**3
+```
+
+# This chunk won't be run. 
+```{r eval = FALSE}
+print("this chunk is not evaluated")
+```
+
+```{r}
+# test above
+```
+
+
+
