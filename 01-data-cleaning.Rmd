@@ -1,0 +1,179 @@
+---
+title: "01-DataCleaning"
+author: "Whitney"
+date: "2/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data cleaning
+Following Ch10 in https://science-for-nature-and-people.github.io/2020-data-collab-workshop/2020-02-snapp/data-cleaning-and-manipulation.html
+
+## Load libraries
+Good to always do this first, at the top of your code.
+Lets others know what the dependencies are.
+Can include an if-statement to install if needed (if you're sharing across machines/people)
+
+e.g. 
+
+packages <- c("DT", "devtools", "tidyverse", "ggmap", "ggplot2", "leaflet", "readxl", "tidyr", "scales", "sf", "raster", "rmarkdown", "roxygen2", "broom", "captioner")
+
+for (package in packages) { if (!(package %in% installed.packages())) { install.packages(package) } }
+
+If you don't want to see library warnings everytime (after you read it!), set warning=F, message=F
+
+```{r load-libraries, warning= F, message = F}
+library(dplyr)
+library(tidyr)
+```
+
+## Read in data
+We are using data from
+[Mike Byerly. Alaska commercial salmon catches by management region (1886- 1997). Gulf of Alaska Data Portal. df35b.304.2](https://knb.ecoinformatics.org/view/df35b.304.2)
+
+(See above for hyperlink formatting in RMD)
+
+Keep 'original' version of dataframe around without having to read it in again. 
+
+```{r}
+catch_original <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1",method="libcurl"),stringsAsFactors = F)
+
+head(catch_original)
+
+```
+
+## Clean and reshape
+Remove marginal sum and notes columns using `select()`
+
+Note: The pipe operator `%>%` (cmd-shift-m). Read as "then". More computationally efficient than rows of re-assignment. 
+
+Warning: NAs introduced by coercion. Check: what did I assume? 
+
+```{r}
+catch_clean <- catch_original %>%
+  select(Region,Year, Chinook, Sockeye, Coho, Pink, Chum) %>% 
+  mutate(Chinook = ifelse(Chinook == "I", 1, Chinook)) %>% # else = keep original value of Chinook.
+  mutate(Chinook = as.numeric(Chinook))
+
+# Review data
+head(catch_clean)
+summary(catch_clean) # Chinook is character
+```
+
+### QA
+Find where as.numeric couldn't convert chinook to a number.
+
+```{r}
+i <- which(is.na(catch_clean$Chinook))
+i
+```
+```{r}
+catch_original[i,]
+```
+
+### Reshape wide to tall
+Using (new) function `pivot_longer`
+
+* `melt`/`cast` - from plyr
+* `gather`/`spread` - from dplyr (updated from plyr::melt/cast)
+* `pivot_wider`/`pivot_longer` - updated from dplyr::gather/spread
+
+```{r}
+catch_long <- catch_clean %>% 
+  pivot_longer(cols = -c(Region,Year), 
+               names_to = "species",
+               values_to = "catch") %>% 
+  #mutate(catch = catch * 1000) %>% # overwrite then rename to not create a new column
+  #rename(catch_thousands = "catch" ) %>% # rename: value new = value old
+  mutate(catch_thousands = catch * 1000)# new column
+  
+
+head(catch_long)
+
+```
+### Example with `pivot_wider`
+
+```{r}
+catch_wide <- catch_long %>% 
+  pivot_wider(names_from = Year,
+              values_from = catch)
+
+head(catch_wide)
+```
+### group_by and summarize
+
+group_by: on the backend, adds grouping information to dataframe. 
+
+```{r}
+mean_region <- catch_long %>% 
+  group_by(Region) %>% 
+  summarise(catch_mean = mean(catch),
+            num_obs = n()) # count number of observations in each group
+
+head(mean_region)
+```
+
+```{r}
+mean_species <- catch_long %>% 
+  group_by(species) %>% 
+  summarise(mean_catch = mean(catch),
+            num_obs = n())
+
+head(mean_species)
+```
+```{r}
+# in what year was the total salmon catch highest? 
+annual_catch <- catch_long %>% 
+  group_by(Year) %>% 
+  summarise(total_catch = sum(catch)) %>% 
+  arrange(-total_catch)
+
+annual_catch
+
+```
+
+```{r}
+# what year had the highest sockeye catch?
+# using "filter" 
+annual_sockeye <- catch_long %>% 
+  filter(species == "Sockeye") %>% 
+  group_by(Year) %>%
+  summarise(total_catch = sum(catch)) %>% 
+  arrange(-total_catch)
+
+annual_sockeye
+```
+
+## Joins 
+
+See [Ch 10.14 "Joins in dplyr"](https://science-for-nature-and-people.github.io/2020-data-collab-workshop/2020-02-snapp/data-cleaning-and-manipulation.html#joins-in-dplyr)
+
+Think about how many rows and columns you expect to return before doing the join. 
+e.g. If I get as many rows returned as I have in my left table, was correct. 
+if RHS table has duplicate keys, then the result of a left_join will be twice as long. 
+(This indicates a problem with the original data).
+
+```{r}
+# Want to join the name of the management area to our df. 
+region_defs <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1",method="libcurl"),stringsAsFactors = F) %>% 
+  select(code,mgmtArea) # can select at the time of read. 
+  
+region_defs
+```
+```{r}
+catch_joined <- left_join(catch_long, region_defs, by = c("Region" = "code")) # c(LHS key = RHS) key
+
+# Equivalent, but less explicit: 
+#catch_joined <- catch_long %>% 
+#  left_join(region_defs)
+
+catch_joined
+```
+
+
+
+
+## Join to regions table
