@@ -66,9 +66,91 @@ ggplot(annual_esc, aes(x = Species, y = escapement)) +
 
 ```
 
+## Per region
 
+```{r}
+ggplot(annual_esc, aes(x=Species, y=escapement, fill =  SASAP.Region)) + 
+  geom_col()
+```
+### Looking into the Kodiak region 
+By adding filter to ggplot 
 
+Hint! the `<TAB>` key will show options in things like `theme()`
 
+Jeanette's oder of operations for ggplot: 
+* Data
+* GEOMS
+* Scaling
+* Titles / labels
+* Themes
 
+```{r}
+annual_esc %>% 
+  filter(SASAP.Region == "Kodiak") %>% 
+  ggplot(aes(x = Year, y  = escapement, color=Species)) + 
+  # Any GEOM's
+  geom_line() + geom_point() + 
+  # Any scaling
+  # Add titles / labels
+  ggtitle("Salmon Escapement in the Kodiak Region") + 
+  ylab("Escapement") + 
+  # Any theme calls. Adjust almost anything about the appearance with 'theme'
+  theme_bw() + 
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") # Center the title. 
+
+```
+
+### Save a theme as an object:
+
+```{r}
+my_theme <- theme_bw() + 
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") + 
+  theme(legend.title = element_blank()) # Use 'element_blank' to delete things
+```
+
+Try it out. 
+
+```{r}
+annual_esc %>% 
+  filter(SASAP.Region == "Kodiak") %>% 
+  ggplot(aes(x = Year, y  = escapement, color=Species)) + 
+  # Any GEOM's
+  geom_line() + geom_point() + 
+  # Any scaling
+  # Add titles / labels
+  ggtitle("Salmon Escapement in the Kodiak Region") + 
+  ylab("Escapement") + 
+  my_theme 
+
+```
+
+## Playing with Facet
+
+```{r}
+
+annual_esc %>% 
+  ggplot(aes(x = Year, y  = escapement, color=Species)) + 
+  geom_line() + geom_point() + 
+  scale_y_continuous(labels=comma)+ # change the way numbers are shown
+  facet_wrap(~SASAP.Region, scales="free_y",ncol=2) + # free_y allows y to scale to data
+  ggtitle("Salmon Escapement in the Kodiak Region") + 
+  ylab("Escapement") + 
+  my_theme 
+```
+## Patchwork (package)
+A nice package to create multi panel figures!
+
+```{r}
+library(package)
+
+# Save plot into a variable (its just a list)
+p1 <- ggplot(annual_esc, aes(x=Species, y=escapement)) + 
+  geom_col() 
+  
+p2 <- ggplot(annual_esc, aes(x=Species, y=escapement)) + 
+  geom_col(fill = "blue")
+
+p1 + p2 # Use patchwork to make one figure
+```
 
 
