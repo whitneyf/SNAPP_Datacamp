@@ -1,0 +1,22 @@
+---
+title: "03-functions.Rmd"
+author: "Whitney"
+date: "2/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Source function files 
+```{r}
+source("03-functiondefs.R")
+```
+
+
+# Commenting functions
+```{r}
+compute_ratio(10,55)
+```
+
