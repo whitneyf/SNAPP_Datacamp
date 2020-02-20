@@ -1,0 +1,74 @@
+---
+title: "02-data-vis"
+author: "Whitney"
+date: "2/20/2020"
+output: html_document
+---
+
+# Data Visualization 
+Following along from 
+[Ch 12, SNAPP Book](https://science-for-nature-and-people.github.io/2020-data-collab-workshop/2020-02-snapp/publication-graphics.html)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading packages
+```{r message=FALSE, warning=FALSE}
+
+library(leaflet)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(DT)
+library(scales) # install.packages("scales")
+library(patchwork) # install.packages("patchwork")
+
+```
+
+## Load data
+```{r}
+data_url <- "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e"
+
+# If the file exists locally, read it, otherwise get it from KNB
+esc <- tryCatch(
+    read.csv("data/escapement.csv", stringsAsFactors = FALSE),
+    error=function(cond) {
+        message(paste("Escapement file does not seem to exist, so get it from the KNB."))
+        esc <- read.csv(url(data_url, method = "libcurl"), stringsAsFactors = FALSE)
+        return(esc)
+    }
+)
+
+head(esc)
+
+```
+
+## Data processing
+
+```{r}
+annual_esc <- esc %>% 
+  # Split column (of character data), default drops the original column.
+  separate(sampleDate, c("Year","Month", "Day"), sep = "-") %>% 
+  mutate(Year = as.numeric(Year),
+         Month = as.numeric(Month),
+         Day = as.numeric(Day)) %>% 
+  group_by(Species, SASAP.Region, Year) %>% 
+  summarise(escapement = sum(DailyCount)) %>% 
+  filter(Species %in% c("Chinook", "Sockeye", "Chum", "Coho", "Pink"))
+  
+head(annual_esc)
+```
+```{r}
+
+ggplot(annual_esc, aes(x = Species, y = escapement)) +
+  geom_col(fill = "blue")
+
+```
+
+
+
+
+
+
+
