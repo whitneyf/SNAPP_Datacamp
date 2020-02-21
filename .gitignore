@@ -40,3 +40,6 @@ vignettes/*.pdf
 
 # Specific files
 01-data-cleaning.html
+
+# html output
+*.html
