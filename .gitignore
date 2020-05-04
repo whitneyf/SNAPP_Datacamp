@@ -31,7 +31,7 @@ vignettes/*.pdf
 # html output
 *.html
 # shapefile data directory
-data/
+# data/
 
 # Other files to ignore
 Whitney.pptx
