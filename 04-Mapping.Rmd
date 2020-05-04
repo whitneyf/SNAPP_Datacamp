@@ -15,6 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 [Ch 17](https://science-for-nature-and-people.github.io/2020-data-collab-workshop/2020-02-snapp/spatial-vector-analysis-using-sf.html)
 
+[More info](https://nceas.github.io/oss-lessons/publishing-maps-to-the-web-in-r/publishing-maps-to-the-web-in-r.html)
+
 SF: An R implementation of the SIMPLE FEATURES standard. (A newer, better version of `sp`)
 
 HINT: Create a simplified version of a dataset (not high res) for code testing. 
